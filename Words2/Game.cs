@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,8 +59,8 @@ namespace Words2
                     break;
             }
 
-            JObject localInfo = JObject.Parse(File.ReadAllText(@"..\..\..\JSON\Localization\" + fname));
-            _local = localInfo.ToObject<Localization>();
+            _local = JsonConvert.DeserializeObject<Localization>
+                (File.ReadAllText(@"..\..\..\JSON\Localization\" + fname));
         }
 
         uint SelectLanguage()
