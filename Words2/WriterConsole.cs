@@ -6,7 +6,7 @@ namespace Words2
 {
     class WriterConsole: IWriter
     {
-        public void Write(string message)
+        public void WriteMessage(string message)
         {
             Console.WriteLine(message);
         }

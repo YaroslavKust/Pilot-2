@@ -6,7 +6,7 @@ namespace Words2
 {
     interface IWriter
     {
-        void Write(string message);
+        void WriteMessage(string message);
         void WriteError(string textError);
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
 
 namespace Words2
 {
@@ -6,6 +8,8 @@ namespace Words2
     {
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             IWriter writer = new WriterConsole();
             IReader reader = new ReaderConsole();
 
@@ -14,7 +18,7 @@ namespace Words2
                 Game game = new Game(writer, reader);
                 game.Start();
 
-                Console.WriteLine("Нажмите любую клавишу для начала игры");
+                Console.WriteLine("Press any key to start game");
                 Console.ReadKey();
             }
         }

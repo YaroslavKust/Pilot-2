@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -17,6 +19,7 @@ namespace Words2
 
         IWriter _writer;
         IReader _reader;
+        Localization _local;
 
 
         public Game(IWriter writer, IReader reader)
@@ -31,15 +34,53 @@ namespace Words2
 
         public void Start()
         {
+            EditLocalization();
             EnterGameWord();
             InitializePlayers();
             GameCycle();
         }
 
 
+        void EditLocalization()
+        {
+            _writer.WriteMessage("Select language:\n1.English\n2.Русский");
+
+            uint key = SelectLanguage();
+            string fname = "";
+
+            switch (key)
+            {
+                case 1:
+                    fname = "En.json";
+                    break;
+                case 2:
+                    fname = "Ru.json";
+                    break;
+            }
+
+            JObject localInfo = JObject.Parse(File.ReadAllText(@"..\..\..\JSON\Localization\" + fname));
+            _local = localInfo.ToObject<Localization>();
+        }
+
+        uint SelectLanguage()
+        {
+            uint key;
+
+            _writer.WriteMessage("Enter number, associated with your choice:");
+            string num = _reader.Read();
+
+            if (UInt32.TryParse(num, out key) && key <= 2)
+                return key;
+            else
+            {
+                _writer.WriteError("Invalid data!");
+                return SelectLanguage();
+            }
+        }
+
         void EnterGameWord()
         {
-            _writer.Write("Введите игровое слово длиной от 8 до 30 символов: ");
+            _writer.WriteMessage(_local.EnterGameWord);
             string inputString = _reader.Read();
 
             Regex regex = new Regex(_format);
@@ -50,13 +91,13 @@ namespace Words2
             else
             {
                 if (inputString.Length < 8)
-                    _writer.WriteError("Слово слишком короткое!");
+                    _writer.WriteError(_local.TooShortWord);
                 else if (inputString.Length > 30)
-                    _writer.WriteError("Слово слишком длинное!");
+                    _writer.WriteError(_local.TooLongWord);
                 else
-                    _writer.WriteError("Слово содержит неверные символы!");
+                    _writer.WriteError(_local.WrongSymbols);
 
-                _writer.Write("Попробуйте ещё раз");
+                _writer.WriteMessage(_local.TryAgain);
                 EnterGameWord();
             }
         }
@@ -64,17 +105,17 @@ namespace Words2
 
         string EnterPlayerName()
         {
-            string name = Console.ReadLine();
+            string name = _reader.Read();
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                _writer.WriteError("Введено пустое имя!\nПопробуйте ещё раз: ");
+                _writer.WriteError(_local.EmptyName + '\n' + _local.TryAgain);
                 return EnterPlayerName();
             }
 
             if (_players.Any(p =>p != null && p.Name == name))
             {
-                _writer.WriteError("Имя уже занято!\nПопробуйте ещё раз: ");
+                _writer.WriteError(_local.TakenName + '\n' + _local.TryAgain);
                 return EnterPlayerName();
             }
 
@@ -86,7 +127,7 @@ namespace Words2
         {
             for (int i = 0; i < 2; i++)
             {
-                _writer.Write($"Игрок {i + 1}, введите ваше имя: ");
+                _writer.WriteMessage(_local.Player + (i + 1) + ' ' + _local.EnterName);
                 _players[i] = new Player(EnterPlayerName());
             }
         }
@@ -101,7 +142,7 @@ namespace Words2
 
             while (true)
             {
-                _writer.Write(player.Name + ": ");
+                _writer.WriteMessage(player.Name + ": ");
                 string word = _reader.Read();
                 word = word.ToLower();
 
@@ -110,9 +151,9 @@ namespace Words2
                     for (int i = 0; i < word.Length; i++)
                         if (!mainWord.Contains(word[i]) || string.IsNullOrWhiteSpace(word))
                         {
-                            _writer.Write("Неверное слово!");
-                            _writer.Write(player.Name + " проиграл");
-                            _writer.Write(rival.Name + " победил");
+                            _writer.WriteMessage(_local.WrongWord);
+                            _writer.WriteMessage(player.Name + ' ' + _local.Lose);
+                            _writer.WriteMessage(rival.Name + ' ' + _local.Win);
                             rival.Score = _res.GetPlayerScore(rival) + 1;
                             _res.WriteResult(rival);
                             return;
@@ -120,7 +161,7 @@ namespace Words2
 
                     if (_wordList.Contains(word))
                     {
-                        _writer.Write("Слово уже было");
+                        _writer.WriteMessage(_local.WordAlreadyExists);
                         continue;
                     }
                     else
@@ -140,15 +181,15 @@ namespace Words2
             {
                 case @"/show-words":
                     foreach (string s in _wordList)
-                        _writer.Write(s);
+                        _writer.WriteMessage(s);
                     break;
                 case @"/score":
                     for (int i = 0; i < 2; i++)
-                        _writer.Write(_players[i].Name + ": " + _res.GetPlayerScore(_players[i]));
+                        _writer.WriteMessage(_players[i].Name + ": " + _res.GetPlayerScore(_players[i]));
                     break;
                 case @"/total-score":
                     foreach (Player p in _res.GetTotalResults())
-                        _writer.Write(p.Name + ": " + p.Score);
+                        _writer.WriteMessage(p.Name + ": " + p.Score);
                     break;
                 default:
                     return 0;

@@ -1,0 +1,16 @@
+{
+  "BeginGame": "Press any key to start game",
+  "EnterGameWord": "Enter game word, length from 8 to 30 symbols: ",
+  "Player": "Player",
+  "EnterName": "enter name",
+  "TooShortWord": "Word is too short!",
+  "TooLongWord": "Word is too long!",
+  "TryAgain": "Try again",
+  "WrongSymbols": "Word contains incorrect symbols!",
+  "EmptyName": "Entered empy name!",
+  "TakenName": "Name is already taken!",
+  "Lose": "lose",
+  "Win": "win",
+  "WordAlreadyExists": "Word is repeated!",
+  "WrongWord": "Wrong word!"
+}
