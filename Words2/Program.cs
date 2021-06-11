@@ -6,9 +6,12 @@ namespace Words2
     {
         static void Main(string[] args)
         {
+            IWriter writer = new WriterConsole();
+            IReader reader = new ReaderConsole();
+
             while (true)
             {
-                Game game = new Game();
+                Game game = new Game(writer, reader);
                 game.Start();
 
                 Console.WriteLine("Нажмите любую клавишу для начала игры");
