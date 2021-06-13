@@ -5,25 +5,25 @@ using System.Linq;
 
 namespace Words2
 {
-    class Result
+    static class Result
     {
-        string _path = @"..\..\..\JSON\GameResults.json";
-        JArray _resultList;
+        static string _path = @"..\..\..\JSON\GameResults.json";
+        static JArray _resultList;
 
 
-        public Result()
+        static Result()
         {
             _resultList = JArray.Parse(File.ReadAllText(_path));
         }
 
 
-        private JToken GetPlayerToken(Player player)
+        private static JToken GetPlayerToken(Player player)
         {
             return _resultList.FirstOrDefault(a => a.ToObject<Player>().Name == player.Name);
         }
 
 
-        public int GetPlayerScore(Player player)
+        public static int GetPlayerScore(Player player)
         {
             JToken res = GetPlayerToken(player);
 
@@ -34,7 +34,7 @@ namespace Words2
         }
 
 
-        public List<Player> GetTotalResults()
+        public static List<Player> GetTotalResults()
         {
             List<Player> players = new List<Player>();
 
@@ -45,7 +45,7 @@ namespace Words2
         }
 
 
-        public void WriteResult(Player player)
+        public static void WriteResult(Player player)
         {
             var p = GetPlayerToken(player);
 

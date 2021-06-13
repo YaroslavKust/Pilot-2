@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,16 +10,14 @@ namespace Words2
     class Game
     {
         Player[] _players;
-
+        Player _active, _rival;
         string _mainWord;
         string _format = @"^[A-zА-яЁё]{8,30}$";
-
         List<string> _wordList;
-        Result _res;
-
         IWriter _writer;
         IReader _reader;
         Localization _local;
+        bool end;
 
 
         public Game(IWriter writer, IReader reader)
@@ -29,25 +26,33 @@ namespace Words2
             _reader = reader;
             _players = new Player[2];
             _wordList = new List<string>();
-            _res = new Result();
         }
 
 
         public void Start()
         {
-            EditLocalization();
+            end = false;
+            SelectLanguage();
             EnterGameWord();
             InitializePlayers();
             GameCycle();
         }
 
 
-        void EditLocalization()
+        void SelectLanguage()
         {
-            _writer.WriteMessage("Select language:\n1.English\n2.Русский");
-
-            uint key = SelectLanguage();
+            uint key;
             string fname = "";
+
+            _writer.WriteMessage("Select language:\n1.English\n2.Русский");
+            _writer.WriteMessage("Enter number, associated with your choice:");
+            string num = _reader.Read();
+
+            if (!(UInt32.TryParse(num, out key) && key <= 2))
+            {
+                _writer.WriteError("Invalid data!");
+                SelectLanguage();
+            }
 
             switch (key)
             {
@@ -63,21 +68,6 @@ namespace Words2
                 (File.ReadAllText(@"..\..\..\JSON\Localization\" + fname));
         }
 
-        uint SelectLanguage()
-        {
-            uint key;
-
-            _writer.WriteMessage("Enter number, associated with your choice:");
-            string num = _reader.Read();
-
-            if (UInt32.TryParse(num, out key) && key <= 2)
-                return key;
-            else
-            {
-                _writer.WriteError("Invalid data!");
-                return SelectLanguage();
-            }
-        }
 
         void EnterGameWord()
         {
@@ -104,6 +94,16 @@ namespace Words2
         }
 
 
+        void InitializePlayers()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                _writer.WriteMessage(_local.Player + (i + 1) + ' ' + _local.EnterName);
+                _players[i] = new Player(EnterPlayerName());
+            }
+        }
+
+
         string EnterPlayerName()
         {
             string name = _reader.Read();
@@ -124,28 +124,18 @@ namespace Words2
         }
 
 
-        void InitializePlayers()
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                _writer.WriteMessage(_local.Player + (i + 1) + ' ' + _local.EnterName);
-                _players[i] = new Player(EnterPlayerName());
-            }
-        }
-
-
         void GameCycle()
         {
             string mainWord = _mainWord.ToLower();
 
-            Player player = _players[0];
-            Player rival = _players[1];
+            _active = _players[0];
+            _rival = _players[1];
 
             while (true)
             {
-                _writer.WriteMessage(player.Name + ": ");
-                string word = _reader.Read();
-                word = word.ToLower();
+                _writer.WriteMessage(_active.Name + ": ");
+
+                string word = _reader.Read().ToLower();
 
                 if (ExecCommand(word) == 0)
                 {
@@ -153,10 +143,7 @@ namespace Words2
                         if (!mainWord.Contains(word[i]) || string.IsNullOrWhiteSpace(word))
                         {
                             _writer.WriteMessage(_local.WrongWord);
-                            _writer.WriteMessage(player.Name + ' ' + _local.Lose);
-                            _writer.WriteMessage(rival.Name + ' ' + _local.Win);
-                            rival.Score = _res.GetPlayerScore(rival) + 1;
-                            _res.WriteResult(rival);
+                            EndGame();
                             return;
                         }
 
@@ -168,9 +155,9 @@ namespace Words2
                     else
                         _wordList.Add(word);
 
-                    Player rezPlayer = rival;
-                    rival = player;
-                    player = rezPlayer;
+                    Player rezPlayer = _rival;
+                    _rival = _active;
+                    _active = rezPlayer;
                 }
             }
         }
@@ -186,16 +173,26 @@ namespace Words2
                     break;
                 case @"/score":
                     for (int i = 0; i < 2; i++)
-                        _writer.WriteMessage(_players[i].Name + ": " + _res.GetPlayerScore(_players[i]));
+                        _writer.WriteMessage(_players[i].Name + ": " + Result.GetPlayerScore(_players[i]));
                     break;
                 case @"/total-score":
-                    foreach (Player p in _res.GetTotalResults())
+                    foreach (Player p in Result.GetTotalResults())
                         _writer.WriteMessage(p.Name + ": " + p.Score);
                     break;
                 default:
                     return 0;
             }
             return 1;
+        }
+
+
+        void EndGame()
+        {
+            _writer.WriteMessage(_active.Name + ' ' + _local.Lose);
+            _writer.WriteMessage(_rival.Name + ' ' + _local.Win);
+            _rival.Score = Result.GetPlayerScore(_rival) + 1;
+            Result.WriteResult(_rival);
+            end = true;
         }
     }
 }
