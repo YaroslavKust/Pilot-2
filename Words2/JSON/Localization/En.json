@@ -6,12 +6,12 @@
   "TooLongWord": "Word is too long!",
   "TryAgain": "Try again",
   "WrongSymbols": "Word contains incorrect symbols!",
-  "EmptyName": "Entered empy name!",
+  "EmptyName": "Entered empty name!",
   "TakenName": "Name is already taken!",
   "Lose": "lose",
   "Win": "win",
   "WordAlreadyExists": "Word is repeated!",
   "WrongWord": "Wrong word!",
   "TimeLost": "Time is over!",
-  "Start": "Game is started! You have only 10 second for input word."
+  "Start": "Game is started! You have only 10 seconds for input word."
 }
