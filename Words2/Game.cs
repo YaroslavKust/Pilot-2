@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Words2
 {
@@ -18,6 +19,7 @@ namespace Words2
         IReader _reader;
         Localization _local;
         bool end;
+        Timer _timer;
 
 
         public Game(IWriter writer, IReader reader)
@@ -52,6 +54,7 @@ namespace Words2
             {
                 _writer.WriteError("Invalid data!");
                 SelectLanguage();
+                return;
             }
 
             switch (key)
@@ -135,7 +138,15 @@ namespace Words2
             {
                 _writer.WriteMessage(_active.Name + ": ");
 
+                TimerCallback tc = new TimerCallback(o => EndGame());
+                _timer = new Timer(tc, null, 10000, Timeout.Infinite);
+
                 string word = _reader.Read().ToLower();
+
+                if (end)
+                    return;
+                else
+                    _timer.Dispose();
 
                 if (ExecCommand(word) == 0)
                 {
@@ -188,6 +199,8 @@ namespace Words2
 
         void EndGame()
         {
+            _timer.Dispose();
+            Console.WriteLine("Время вышло!");
             _writer.WriteMessage(_active.Name + ' ' + _local.Lose);
             _writer.WriteMessage(_rival.Name + ' ' + _local.Win);
             _rival.Score = Result.GetPlayerScore(_rival) + 1;
