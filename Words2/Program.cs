@@ -4,6 +4,8 @@ namespace Words2
 {
     class Program
     {
+        static Game game;
+
         static void Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -13,7 +15,7 @@ namespace Words2
 
             while (true)
             {
-                Game game = new Game(writer, reader);
+                game = new Game(writer, reader);
                 game.Start();
 
                 Console.WriteLine("Press any key to start game");

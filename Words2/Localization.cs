@@ -3,7 +3,6 @@ namespace Words2
 {
     class Localization
     {
-        public string BeginGame { get; set; }
         public string EnterGameWord { get; set; }
         public string Player { get; set; }
         public string EnterName { get; set; }
@@ -17,5 +16,7 @@ namespace Words2
         public string Win { get; set; }
         public string WordAlreadyExists { get; set; }
         public string WrongWord { get; set; }
+        public string TimeLost { get; set; }
+        public string Start { get; set; }
     }
 }

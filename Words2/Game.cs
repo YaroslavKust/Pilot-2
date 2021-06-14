@@ -18,7 +18,7 @@ namespace Words2
         IWriter _writer;
         IReader _reader;
         Localization _local;
-        bool end;
+        bool _end;
         Timer _timer;
 
 
@@ -33,7 +33,7 @@ namespace Words2
 
         public void Start()
         {
-            end = false;
+            _end = false;
             SelectLanguage();
             EnterGameWord();
             InitializePlayers();
@@ -134,24 +134,31 @@ namespace Words2
             _active = _players[0];
             _rival = _players[1];
 
+            _writer.WriteMessage(_local.Start);
+
             while (true)
             {
                 _writer.WriteMessage(_active.Name + ": ");
 
-                TimerCallback tc = new TimerCallback(o => EndGame());
+                TimerCallback tc = new TimerCallback(o => 
+                { 
+                    _writer.WriteMessage(_local.TimeLost); 
+                    EndGame();
+                });
+
                 _timer = new Timer(tc, null, 10000, Timeout.Infinite);
 
-                string word = _reader.Read().ToLower();
+                string word = _reader.Read()?.ToLower();
 
-                if (end)
+                if (_end)
                     return;
                 else
                     _timer.Dispose();
 
-                if (ExecCommand(word) == 0)
+                if (ExecCommand(word) == 0 && !string.IsNullOrWhiteSpace(word))
                 {
                     for (int i = 0; i < word.Length; i++)
-                        if (!mainWord.Contains(word[i]) || string.IsNullOrWhiteSpace(word))
+                        if (!mainWord.Contains(word[i]))
                         {
                             _writer.WriteMessage(_local.WrongWord);
                             EndGame();
@@ -169,6 +176,11 @@ namespace Words2
                     Player rezPlayer = _rival;
                     _rival = _active;
                     _active = rezPlayer;
+                }
+                else
+                {
+                    EndGame();
+                    return;
                 }
             }
         }
@@ -197,15 +209,14 @@ namespace Words2
         }
 
 
-        void EndGame()
+        public void EndGame()
         {
             _timer.Dispose();
-            Console.WriteLine("Время вышло!");
             _writer.WriteMessage(_active.Name + ' ' + _local.Lose);
             _writer.WriteMessage(_rival.Name + ' ' + _local.Win);
             _rival.Score = Result.GetPlayerScore(_rival) + 1;
             Result.WriteResult(_rival);
-            end = true;
+            _end = true;
         }
     }
 }

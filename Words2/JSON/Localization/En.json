@@ -1,5 +1,4 @@
 {
-  "BeginGame": "Press any key to start game",
   "EnterGameWord": "Enter game word, length from 8 to 30 symbols: ",
   "Player": "Player",
   "EnterName": "enter name",
@@ -12,5 +11,7 @@
   "Lose": "lose",
   "Win": "win",
   "WordAlreadyExists": "Word is repeated!",
-  "WrongWord": "Wrong word!"
+  "WrongWord": "Wrong word!",
+  "TimeLost": "Time is over!",
+  "Start": "Game is started! You have only 10 second for input word."
 }
