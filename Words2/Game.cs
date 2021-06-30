@@ -146,7 +146,7 @@ namespace Words2
                     EndGame();
                 });
 
-                _timer = new Timer(tc, null, 10000, Timeout.Infinite);
+                _timer = new Timer(tc, null, 30000, Timeout.Infinite);
 
                 string word = _reader.Read()?.ToLower();
 
@@ -155,7 +155,9 @@ namespace Words2
                 else
                     _timer.Dispose();
 
-                if (ExecCommand(word) == 0 && !string.IsNullOrWhiteSpace(word))
+                int commandResult = ExecCommand(word);
+
+                if (commandResult == 0 && !string.IsNullOrWhiteSpace(word))
                 {
                     for (int i = 0; i < word.Length; i++)
                         if (!mainWord.Contains(word[i]))
@@ -170,14 +172,14 @@ namespace Words2
                         _writer.WriteMessage(_local.WordAlreadyExists);
                         continue;
                     }
-                    else
+                    else 
                         _wordList.Add(word);
 
                     Player rezPlayer = _rival;
                     _rival = _active;
                     _active = rezPlayer;
                 }
-                else
+                else if (commandResult == 0)
                 {
                     EndGame();
                     return;

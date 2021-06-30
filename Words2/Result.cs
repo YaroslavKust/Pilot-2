@@ -26,11 +26,7 @@ namespace Words2
         public static int GetPlayerScore(Player player)
         {
             JToken res = GetPlayerToken(player);
-
-            if (res is null)
-                return 0;
-            else
-                return res.ToObject<Player>().Score;
+            return res is null ? 0 : res.ToObject<Player>().Score;
         }
 
 
